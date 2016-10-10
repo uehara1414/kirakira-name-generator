@@ -4,8 +4,9 @@ from flask import Flask, render_template, request, send_from_directory
 
 from kirakiraname import generate_kirakiraname, generate_kanji_db
 
-app = Flask(__name__, static_url_path='/static')
+generate_kanji_db()
 
+app = Flask(__name__, static_url_path='/static')
 
 @app.route('/', methods=["GET", "POST"])
 def index():
@@ -20,6 +21,5 @@ def index():
 
 
 if __name__ == '__main__':
-    generate_kanji_db()
     port = int(os.environ.get('PORT', 5000))
     app.run(port=port)
