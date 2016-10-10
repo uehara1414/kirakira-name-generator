@@ -16,7 +16,7 @@ def is_katakana(word: str):
     return True
 
 
-def get_blinks(word):
+def get_blinks(word):  # todo: 500 以上のワードも取得するようにする
     if not word:
         return set()
 
@@ -37,7 +37,7 @@ def get_blinks(word):
     return ret
 
 
-def get_links(word):
+def get_links(word): # todo: 500 以上のワードも取得するようにする
     if not word:
         return set()
 
@@ -67,7 +67,7 @@ def get_words(word):
     return a and b
 
 
-def generate_kanji_db():  # 読みを最初の1文字のみでなく、もっと多様な読み方に対応する
+def generate_kanji_db():  # todo: 読みを最初の1文字のみでなく、もっと多様な読み方に対応する
     url = "https://ja.wikipedia.org/wiki/%E5%B8%B8%E7%94%A8%E6%BC%A2%E5%AD%97%E4%B8%80%E8%A6%A7"
     ret = requests.get(url)
     soup = BeautifulSoup(ret.text, "lxml")
