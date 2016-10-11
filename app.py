@@ -1,19 +1,22 @@
 import os
-from flask import Flask, render_template
+import json
+from flask import Flask, render_template, request, send_from_directory
 
-app = Flask(__name__)
+from kirakiraname import generate_kirakiraname
 
 
-@app.route('/')
+app = Flask(__name__, static_url_path='/static')
+
+@app.route('/', methods=["GET", "POST"])
 def index():
-    return 'テスト'
-
-
-@app.route('/hello/<name>')
-def hello(name=''):
-    if name == '':
-        name = 'ななしさん'
-    return render_template('hello.html', name=name)
+    if request.method == 'GET':
+        return render_template("index.html")
+    elif request.method == 'POST':
+        word = request.form.get("word", "")
+        names = list()
+        for name, kana in generate_kirakiraname(word):
+            names.append({"name": name, "kana": kana})
+        return render_template("kirakiraname.html", names=names)
 
 
 if __name__ == '__main__':

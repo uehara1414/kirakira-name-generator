@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+
+{% block input %}
+<section class="container">
+        <form action="/" method="post">
+            <div class="row" align="center">
+                <div class="col-xs-4"></div>
+                <div class="form-group col-xs-4">
+                    <label for="word">キラキラネームの種</label>
+                    <input type="text" class="form-control" id="word" name="word">
+                </div>
+                <div class="col-xs-4"></div>
+            </div>
+            <div class="row" align="center">
+                <div>
+                    <div class="col-xs-4"></div>
+                    <button type="submit" class="btn btn-info col-xs-4">生成</button>
+                    <div class="col-xs-4"></div>
+                </div>
+            </div>
+        </form>
+</section>
+{% endblock %}
+<!-- /Input -->
