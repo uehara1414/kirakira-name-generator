@@ -3,6 +3,8 @@ from bs4 import BeautifulSoup
 import json
 import random
 
+# todo: ひらがなをカタカナに変更する to_katakana 関数を実装する
+
 def is_katakana(word: str):
     if not word:
         return False
@@ -66,7 +68,7 @@ def get_words(word):
     return a and b
 
 
-def generate_kanji_dict():
+def generate_kanji_dict():  # todo: ひらがなも対応するようにする
     url = "https://ja.wikipedia.org/wiki/%E5%B8%B8%E7%94%A8%E6%BC%A2%E5%AD%97%E4%B8%80%E8%A6%A7"
     ret = requests.get(url)
     soup = BeautifulSoup(ret.text, "lxml")
@@ -76,14 +78,34 @@ def generate_kanji_dict():
     trs = table.find_all("tr")[1:]
     ret = dict()
 
-    for tr in trs:
+    for tr in trs:  # todo: リファクタリングする
         tds = tr.find_all('td')
         kanji = tds[1].text[0]
-        kana = tds[8].text[0]
-        try:
-            ret[kana].append(kanji)
-        except KeyError:
-            ret[kana] = list()
+
+        for yomi in tds[8].text.split("、"):
+            if is_katakana(yomi):
+                try:
+                    ret[yomi].append(kanji)
+                except KeyError:
+                    ret[yomi] = list()
+                    ret[yomi].append(kanji)
+
+                if len(yomi) == 1:
+                    continue
+
+                try:
+                    ret[yomi[0]].append(kanji)
+                except KeyError:
+                    ret[yomi[0]] = list()
+                    ret[yomi[0]].append(kanji)
+
+            elif '-' in yomi:
+                print(yomi)
+
+            else:
+                print("except --", yomi)
+
+    print(ret)
     return ret
 
 
