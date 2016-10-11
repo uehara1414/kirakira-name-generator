@@ -5,6 +5,10 @@ import random
 
 # todo: ひらがなをカタカナに変更する to_katakana 関数を実装する
 
+
+class KanjiNotFoundError(BaseException):
+    pass
+
 def is_katakana(word: str):
     if not word:
         return False
@@ -99,17 +103,35 @@ def generate_kanji_dict():  # todo: ひらがなも対応するようにする
                 except KeyError:
                     ret[yomi[0]] = list()
                     ret[yomi[0]].append(kanji)
-
-
-
     return ret
 
 
-def to_kanji(word: str):  # todo: ２文字以上のカタカナからの変換も対応する
-    ret = ""
-    for kana in word:
-        ret += random.choice(get_kanjis(kana))
-    return ret
+def to_kanji(word: str):
+    if len(word) == 0:
+        return ''
+
+    if len(word) == 1:
+        try:
+            return choice_kanji(word)
+        except KeyError:
+            raise KanjiNotFoundError
+
+    if len(word) == 2:
+        try:
+            return choice_kanji(word)
+        except KeyError:
+            w1 = to_kanji(word[0])
+            w2 = to_kanji(word[1])
+            return w1 + w2
+
+    try:
+        w1 = to_kanji(word[:2])
+        w2 = to_kanji(word[2:])
+        return w1 + w2
+    except KeyError:
+        w1 = to_kanji(word[:1])
+        w2 = to_kanji(word[1:])
+        return w1 + w2
 
 
 def generate_kirakiraname(keyword):
@@ -121,13 +143,16 @@ def generate_kirakiraname(keyword):
             continue
         try:
             ret.append((to_kanji(word), word))
-        except:
+        except KanjiNotFoundError:
             pass
     return ret
 
 
 def get_kanjis(kana):
     return KANJI_DICT[kana]
+
+def choice_kanji(kana):
+    return random.choice(KANJI_DICT[kana])
 
 
 KANJI_DICT = generate_kanji_dict()
