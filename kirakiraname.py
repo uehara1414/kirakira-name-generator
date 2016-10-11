@@ -15,7 +15,7 @@ def is_katakana(word: str):
 
     start = b'\xe3\x82\xa1'
     stop = b'\xe3\x83\xb0'
-    n = b'\xe3\x83\xb0'
+    n = b'\xe3\x83\xb3'
     for char in word:
         if not (start < char.encode(encoding='utf8') < stop or char.encode(encoding='utf8') == n):
             return False
