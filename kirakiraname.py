@@ -96,6 +96,7 @@ def to_kanji(word: str):  # todo: ２文字以上のカタカナからの変換�
 
 
 def generate_kirakiraname(keyword):
+    keyword = correct_word(keyword)
     words = get_words(keyword)
     ret = list()
     for word in words:
@@ -115,5 +116,28 @@ def get_kanjis(kana):
 KANJI_DICT = generate_kanji_dict()
 
 
+def correct_word(word):
+    """wikipedia に存在しないワードのとき、そのワードを一番関連性のありそうな記事のワードに置き換える"""
+    url = "https://ja.wikipedia.org/w/index.php"
+    params = {
+        "search": word
+    }
+
+    res = requests.get(url, params=params)
+
+    soup = BeautifulSoup(res.text, "lxml")
+
+    if not "検索結果" in soup.find("title").text:
+        return soup.find("title").text.split()[0]
+
+    if soup.find("p", class_="mw-search-nonefound"):
+        return ""  # 検索結果なし
+
+    result = soup.find("div", class_="mw-search-result-heading")
+
+    title = result.find("a").get("title")
+
+    return title
+
 if __name__ == '__main__':
-    print(generate_kirakiraname("ミミズ"))
+    pass
