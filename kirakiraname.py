@@ -100,13 +100,8 @@ def generate_kanji_dict():  # todo: ひらがなも対応するようにする
                     ret[yomi[0]] = list()
                     ret[yomi[0]].append(kanji)
 
-            elif '-' in yomi:
-                print(yomi)
 
-            else:
-                print("except --", yomi)
 
-    print(ret)
     return ret
 
 
