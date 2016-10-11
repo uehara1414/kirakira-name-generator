@@ -2,7 +2,6 @@ import requests
 from bs4 import BeautifulSoup
 import json
 import random
-import sqlite3
 
 def is_katakana(word: str):
     if not word:
