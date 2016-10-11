@@ -2,9 +2,8 @@ import os
 import json
 from flask import Flask, render_template, request, send_from_directory
 
-from kirakiraname import generate_kirakiraname, generate_kanji_db
+from kirakiraname import generate_kirakiraname
 
-generate_kanji_db()
 
 app = Flask(__name__, static_url_path='/static')
 

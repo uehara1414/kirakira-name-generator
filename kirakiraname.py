@@ -67,7 +67,7 @@ def get_words(word):
     return a and b
 
 
-def generate_kanji_db():  # todo: 読みを最初の1文字のみでなく、もっと多様な読み方に対応する
+def generate_kanji_dict():
     url = "https://ja.wikipedia.org/wiki/%E5%B8%B8%E7%94%A8%E6%BC%A2%E5%AD%97%E4%B8%80%E8%A6%A7"
     ret = requests.get(url)
     soup = BeautifulSoup(ret.text, "lxml")
@@ -75,24 +75,17 @@ def generate_kanji_db():  # todo: 読みを最初の1文字のみでなく、も
     table = soup.find_all("table", class_="sortable")[0]
 
     trs = table.find_all("tr")[1:]
-    ret = list()
+    ret = dict()
 
     for tr in trs:
         tds = tr.find_all('td')
         kanji = tds[1].text[0]
         kana = tds[8].text[0]
-        ret.append((kana, kanji))
-
-
-    connection = sqlite3.connect("kanji.db")
-
-    cursor = connection.cursor()
-
-    cursor.execute('''CREATE TABLE IF NOT EXISTS kanji (id integer PRIMARY KEY, yomi TEXT, kanji TEXT)''')
-    cursor.executemany('''INSERT INTO kanji(yomi, kanji) values(?, ?)''', ret)
-
-    connection.commit()
-
+        try:
+            ret[kana].append(kanji)
+        except KeyError:
+            ret[kana] = list()
+    return ret
 
 
 def to_kanji(word: str):  # todo: ２文字以上のカタカナからの変換も対応する
@@ -116,13 +109,10 @@ def generate_kirakiraname(keyword):
 
 
 def get_kanjis(kana):
-    ret = list()
-    connection = sqlite3.connect("kanji.db")
-    cursor = connection.cursor()
-    for kanji in cursor.execute("""SELECT kanji FROM kanji where yomi=?""", kana):
-        ret.append(kanji[0])
-    connection.commit()
-    return ret
+    return KANJI_DICT[kana]
+
+
+KANJI_DICT = generate_kanji_dict()
 
 
 if __name__ == '__main__':
