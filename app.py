@@ -16,7 +16,7 @@ def index():
         names = list()
         for name, kana in generate_kirakiraname(word):
             names.append({"name": name, "kana": kana})
-        return render_template("kirakiraname.html", names=names)
+        return render_template("kirakiraname.html", names=names, word=word)
 
 
 if __name__ == '__main__':
