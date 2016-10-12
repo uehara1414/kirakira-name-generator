@@ -107,26 +107,22 @@ def generate_kanji_dict():
     trs = table.find_all("tr")[1:]
     ret = dict()
 
-    for tr in trs:  # todo: リファクタリングする
+    for tr in trs:
         tds = tr.find_all('td')
         kanji = tds[1].text[0]
 
         for yomi in tds[8].text.split("、"):
             if is_katakana(yomi):
-                try:
-                    ret[yomi].append(kanji)
-                except KeyError:
+                if not yomi in ret:
                     ret[yomi] = list()
-                    ret[yomi].append(kanji)
+                ret[yomi].append(kanji)
 
                 if len(yomi) == 1:
                     continue
 
-                try:
-                    ret[yomi[0]].append(kanji)
-                except KeyError:
+                if not yomi[0] in ret:
                     ret[yomi[0]] = list()
-                    ret[yomi[0]].append(kanji)
+                ret[yomi[0]].append(kanji)
 
             if is_hiragana(yomi):
                 yomi = to_katakana(yomi)
