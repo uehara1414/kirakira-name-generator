@@ -212,9 +212,6 @@ def choice_kanji(kana):
     return random.choice(KANJI_DICT[kana])
 
 
-KANJI_DICT = generate_kanji_dict()
-
-
 def correct_word(word):
     """wikipedia に存在しないワードのとき、そのワードを一番関連性のありそうな記事のワードに置き換える"""
     url = "https://ja.wikipedia.org/w/index.php"
@@ -237,6 +234,10 @@ def correct_word(word):
     title = result.find("a").get("title")
 
     return title
+
+
+KANJI_DICT = generate_kanji_dict()
+
 
 if __name__ == '__main__':
     print(to_kanji("ドラゴン"))
