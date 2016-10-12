@@ -3,11 +3,37 @@ from bs4 import BeautifulSoup
 import json
 import random
 
+import jaconv
+
 # todo: ひらがなをカタカナに変更する to_katakana 関数を実装する
 
 
 class KanjiNotFoundError(BaseException):
     pass
+
+
+def is_hiragana(word: str):
+    if not word:
+        return False
+
+    start1 = b'\xe3\x81\x81'
+    stop1 = b'\xe3\x82\xbf'
+
+    start2 = b'\xe3\x82\x80'
+    stop2 = b'\xe3\x82\x93'
+
+    for char in word:
+        if not ( start1 < char.encode(encoding='utf8') < stop1 or start2 < char.encode(encoding='utf8') < stop2):
+            return False
+    return True
+
+
+def to_katakana(word: str):
+    if not word:
+        return ""
+
+    return jaconv.hira2kata(word)
+
 
 def is_katakana(word: str):
     if not word:
@@ -103,6 +129,20 @@ def generate_kanji_dict():  # todo: ひらがなも対応するようにする
                 except KeyError:
                     ret[yomi[0]] = list()
                     ret[yomi[0]].append(kanji)
+
+            if is_hiragana(yomi):
+                yomi = to_katakana(yomi)
+                if not yomi in ret:
+                    ret[yomi] = list()
+                ret[yomi].append(kanji)
+                continue
+
+            if '-' in yomi:
+                yomi = to_katakana(yomi.split('-')[0])
+                if not yomi in ret:
+                    ret[yomi] = list()
+                ret[yomi].append(kanji)
+
     return ret
 
 
@@ -173,6 +213,7 @@ def choice_kanji(kana):
 
 
 KANJI_DICT = generate_kanji_dict()
+# open("out.txt", "w", encoding='utf8').write(str(KANJI_DICT))
 
 
 def correct_word(word):
@@ -199,4 +240,4 @@ def correct_word(word):
     return title
 
 if __name__ == '__main__':
-    pass
+    print(to_kanji("ドラゴン"))
