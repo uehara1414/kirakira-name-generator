@@ -124,14 +124,31 @@ def to_kanji(word: str):
             w2 = to_kanji(word[1])
             return w1 + w2
 
+    if len(word) == 3:
+        try:
+            return choice_kanji(word)
+        except KeyError:
+            try:
+                w1 = to_kanji(word[:2])
+                w2 = to_kanji(word[2:])
+            except KeyError:
+                w1 = to_kanji(word[1:])
+                w2 = to_kanji(word[:1])
+            return w1 + w2
+
     try:
-        w1 = to_kanji(word[:2])
-        w2 = to_kanji(word[2:])
+        w1 = to_kanji(word[:3])
+        w2 = to_kanji(word[3:])
         return w1 + w2
     except KeyError:
-        w1 = to_kanji(word[:1])
-        w2 = to_kanji(word[1:])
-        return w1 + w2
+        try:
+            w1 = to_kanji(word[:2])
+            w2 = to_kanji(word[2:])
+            return w1 + w2
+        except KeyError:
+            w1 = to_kanji(word[:1])
+            w2 = to_kanji(word[1:])
+            return w1 + w2
 
 
 def generate_kirakiraname(keyword):
