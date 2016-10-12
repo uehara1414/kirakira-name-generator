@@ -213,7 +213,6 @@ def choice_kanji(kana):
 
 
 KANJI_DICT = generate_kanji_dict()
-# open("out.txt", "w", encoding='utf8').write(str(KANJI_DICT))
 
 
 def correct_word(word):
