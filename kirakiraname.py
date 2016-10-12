@@ -3,11 +3,35 @@ from bs4 import BeautifulSoup
 import json
 import random
 
-# todo: ひらがなをカタカナに変更する to_katakana 関数を実装する
+import jaconv
 
 
 class KanjiNotFoundError(BaseException):
     pass
+
+
+def is_hiragana(word: str):
+    if not word:
+        return False
+
+    start1 = b'\xe3\x81\x81'
+    stop1 = b'\xe3\x82\xbf'
+
+    start2 = b'\xe3\x82\x80'
+    stop2 = b'\xe3\x82\x93'
+
+    for char in word:
+        if not ( start1 < char.encode(encoding='utf8') < stop1 or start2 < char.encode(encoding='utf8') < stop2):
+            return False
+    return True
+
+
+def to_katakana(word: str):
+    if not word:
+        return ""
+
+    return jaconv.hira2kata(word)
+
 
 def is_katakana(word: str):
     if not word:
@@ -15,7 +39,7 @@ def is_katakana(word: str):
 
     start = b'\xe3\x82\xa1'
     stop = b'\xe3\x83\xb0'
-    n = b'\xe3\x83\xb0'
+    n = b'\xe3\x83\xb3'
     for char in word:
         if not (start < char.encode(encoding='utf8') < stop or char.encode(encoding='utf8') == n):
             return False
@@ -73,7 +97,7 @@ def get_words(word):
     return a and b
 
 
-def generate_kanji_dict():  # todo: ひらがなも対応するようにする
+def generate_kanji_dict():
     url = "https://ja.wikipedia.org/wiki/%E5%B8%B8%E7%94%A8%E6%BC%A2%E5%AD%97%E4%B8%80%E8%A6%A7"
     ret = requests.get(url)
     soup = BeautifulSoup(ret.text, "lxml")
@@ -83,26 +107,36 @@ def generate_kanji_dict():  # todo: ひらがなも対応するようにする
     trs = table.find_all("tr")[1:]
     ret = dict()
 
-    for tr in trs:  # todo: リファクタリングする
+    for tr in trs:
         tds = tr.find_all('td')
         kanji = tds[1].text[0]
 
         for yomi in tds[8].text.split("、"):
             if is_katakana(yomi):
-                try:
-                    ret[yomi].append(kanji)
-                except KeyError:
+                if not yomi in ret:
                     ret[yomi] = list()
-                    ret[yomi].append(kanji)
+                ret[yomi].append(kanji)
 
                 if len(yomi) == 1:
                     continue
 
-                try:
-                    ret[yomi[0]].append(kanji)
-                except KeyError:
+                if not yomi[0] in ret:
                     ret[yomi[0]] = list()
-                    ret[yomi[0]].append(kanji)
+                ret[yomi[0]].append(kanji)
+
+            if is_hiragana(yomi):
+                yomi = to_katakana(yomi)
+                if not yomi in ret:
+                    ret[yomi] = list()
+                ret[yomi].append(kanji)
+                continue
+
+            if '-' in yomi:
+                yomi = to_katakana(yomi.split('-')[0])
+                if not yomi in ret:
+                    ret[yomi] = list()
+                ret[yomi].append(kanji)
+
     return ret
 
 
@@ -124,14 +158,31 @@ def to_kanji(word: str):
             w2 = to_kanji(word[1])
             return w1 + w2
 
+    if len(word) == 3:
+        try:
+            return choice_kanji(word)
+        except KeyError:
+            try:
+                w1 = to_kanji(word[:2])
+                w2 = to_kanji(word[2:])
+            except KeyError:
+                w1 = to_kanji(word[1:])
+                w2 = to_kanji(word[:1])
+            return w1 + w2
+
     try:
-        w1 = to_kanji(word[:2])
-        w2 = to_kanji(word[2:])
+        w1 = to_kanji(word[:3])
+        w2 = to_kanji(word[3:])
         return w1 + w2
     except KeyError:
-        w1 = to_kanji(word[:1])
-        w2 = to_kanji(word[1:])
-        return w1 + w2
+        try:
+            w1 = to_kanji(word[:2])
+            w2 = to_kanji(word[2:])
+            return w1 + w2
+        except KeyError:
+            w1 = to_kanji(word[:1])
+            w2 = to_kanji(word[1:])
+            return w1 + w2
 
 
 def generate_kirakiraname(keyword):
@@ -153,9 +204,6 @@ def get_kanjis(kana):
 
 def choice_kanji(kana):
     return random.choice(KANJI_DICT[kana])
-
-
-KANJI_DICT = generate_kanji_dict()
 
 
 def correct_word(word):
@@ -181,5 +229,9 @@ def correct_word(word):
 
     return title
 
+
+KANJI_DICT = generate_kanji_dict()
+
+
 if __name__ == '__main__':
-    pass
+    print(to_kanji("ドラゴン"))
